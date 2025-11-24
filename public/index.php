@@ -71,15 +71,18 @@ try {
                 <!-- Si el usuario TIENE sesión iniciada -->
                 <a href="#">Mis Pedidos</a>
                 <?php if ($_SESSION['role'] === 'admin'): ?>
-                    <a href="#">Gestionar Productos</a>
+                    <a href="items_list.php">Gestionar Productos</a>
                 <?php endif; ?>
+                
+                <!-- ESTA ES LA LÍNEA QUE CAMBIAMOS: -->
+                <a href="items_list.php">Ver Catálogo Completo</a>
                 
             <?php else: ?>
                 <!-- Si el usuario NO tiene sesión iniciada -->
                 <a href="login.php">Iniciar Sesión</a>
+                <!-- Si quieres que los NO logueados también vean la lista, cambia el # por items_list.php aquí también -->
+                <a href="login.php">Ver Catálogo (Requiere Login)</a>
             <?php endif; ?>
-
-            <a href="#">Ver Catálogo</a>
         </nav>
     </main>
 
