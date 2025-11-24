@@ -3,6 +3,7 @@
 // Punto de partida inicial. Por ahora solo nos muestra la bienvenida y prueba la bbdd.
 
 require_once __DIR__ . '/../app/pdo.php'; // Importamos la conexión de la bbdd
+require_once __DIR__ . '/../app/auth.php'; // Importamos la autenticación
 
 // Hacemos una consulta de prueba para ver si conecta bien
 // Esto lo borraremos más adelante, es solo para hacer primer commit
@@ -29,6 +30,9 @@ try {
         .status { padding: 10px; background: #e0f7fa; border-left: 5px solid #00bcd4; margin-bottom: 20px; }
         .nav { margin-top: 20px; }
         .nav a { text-decoration: none; color: #0077b6; margin-right: 15px; font-weight: bold; }
+        /* Agrego un pequeño estilo para el mensaje de bienvenida en la cabecera */
+        .header-user { font-size: 0.8rem; margin-top: 5px; opacity: 0.9; }
+        .header-user a { color: white; text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -36,6 +40,14 @@ try {
     <header>
         <h1>Decartón</h1>
         <p>Lo mejor para el deporte (al mejor precio)</p>
+        
+        <!-- AÑADIDO: Información del usuario si está logueado -->
+        <div class="header-user">
+            <?php if (is_logged_in()): ?>
+                Hola, <strong><?php echo htmlspecialchars($_SESSION['username']); ?></strong>
+                | <a href="logout.php">Cerrar Sesión</a>
+            <?php endif; ?>
+        </div>
     </header>
 
     <main>
@@ -47,10 +59,26 @@ try {
         </div>
 
         <p>Actualmente estamos construyendo el sitio. Próximamente podrás iniciar sesión y ver nuestros productos.</p>
+        
+        <!-- AÑADIDO: Mensaje condicional -->
+        <?php if (is_logged_in()): ?>
+            <p style="color: green; font-weight: bold;">¡Has iniciado sesión correctamente! (Rol: <?php echo $_SESSION['role']; ?>)</p>
+        <?php endif; ?>
 
         <nav class="nav">
-            <!-- En el siguiente paso haremos que estos enlaces funcionen -->
-            <a href="login.php">Iniciar Sesión</a>
+            <!-- MODIFICADO: Enlaces dinámicos según si estás logueado o no -->
+            <?php if (is_logged_in()): ?>
+                <!-- Si el usuario TIENE sesión iniciada -->
+                <a href="#">Mis Pedidos</a>
+                <?php if ($_SESSION['role'] === 'admin'): ?>
+                    <a href="#">Gestionar Productos</a>
+                <?php endif; ?>
+                
+            <?php else: ?>
+                <!-- Si el usuario NO tiene sesión iniciada -->
+                <a href="login.php">Iniciar Sesión</a>
+            <?php endif; ?>
+
             <a href="#">Ver Catálogo</a>
         </nav>
     </main>
