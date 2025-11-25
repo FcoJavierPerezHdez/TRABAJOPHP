@@ -48,8 +48,8 @@ try {
         <h1>Catálogo de Productos</h1>
         <div>
             <a href="index.php" class="btn-back">Volver al Inicio</a>
-            <!-- Este botón lo usaremos en el futuro paso de "Crear" -->
-            <a href="#" class="btn-new">+ Nuevo Producto</a>
+            <!--Ponemos el enlace real -->
+            <a href="items_form.php" class="btn-new">+ Nuevo Producto</a>
         </div>
     </div>
 
