@@ -75,9 +75,11 @@ try {
                     <td><?php echo number_format($product['price'], 2); ?> €</td>
                     <td><?php echo $product['stock']; ?> uds.</td>
                     <td class="actions">
-                        <!-- Enlaces vacíos por ahora, los rellenaremos en próximos pasos -->
-                        <a href="#" class="btn-edit">Editar</a>
-                        <a href="#" class="btn-delete">Borrar</a>
+                    <!-- CAMBIO: Ahora pasamos el ID por la URL -->
+                    <a href="items_form.php?id=<?php echo $product['id']; ?>" class="btn-edit">Editar</a>
+        
+                    <a href="#" class="btn-delete">Borrar</a>
+                    </td>
                     </td>
                 </tr>
                 <?php endforeach; ?>

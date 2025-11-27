@@ -3,53 +3,88 @@
 require_once __DIR__ . '/../app/pdo.php';
 require_once __DIR__ . '/../app/auth.php';
 
-// Solo los usuarios logueados pueden crear productos
 require_login();
 
-// Iniciamos variables para que el formulario no falle al cargar por primera vez
+// Variables iniciales (por defecto están vacías para "Crear nuevo producto")
+$id = '';
 $name = '';
 $description = '';
 $price = '';
 $stock = '';
 $errors = [];
+$is_edit = false; // Bandera para saber si estamos editando
 
-// Cuando le das a guardar en el formulario.
+// --- LOGICA DE CARGA (Si venimos de darle clic a "Editar") ---
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
+    // Buscamos el producto en la bbdd
+    $stmt = $pdo->prepare("SELECT * FROM products WHERE id = :id LIMIT 1");
+    $stmt->execute([':id' => $id]);
+    $product = $stmt->fetch();
+
+    if ($product) {
+        // Si existe, rellenamos las variables con sus datos
+        $is_edit = true;
+        $name = $product['name'];
+        $description = $product['description'];
+        $price = $product['price'];
+        $stock = $product['stock'];
+    } else {
+        // Si ponen un ID inventado, redirigimos
+        header('Location: items_list.php');
+        exit;
+    }
+}
+
+// --- LOGICA DE GUARDADO (POST) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Recogemos los datos 
+    // Recogemos datos
+    $id = $_POST['id'] ?? ''; // Recogemos el ID oculto si existe
     $name = trim($_POST['name'] ?? '');
     $description = trim($_POST['description'] ?? '');
     $price = $_POST['price'] ?? '';
     $stock = $_POST['stock'] ?? '';
 
-    // Validaciones necesarias
-    if (empty($name)) {
-        $errors[] = "El nombre es obligatorio.";
-    }
-    if (!is_numeric($price) || $price < 0) {
-        $errors[] = "El precio debe ser un número positivo.";
-    }
-    if (!is_numeric($stock) || $stock < 0) {
-        $errors[] = "El stock debe ser un número entero positivo.";
-    }
+    // Validaciones
+    if (empty($name)) $errors[] = "El nombre es obligatorio.";
+    if (!is_numeric($price) || $price < 0) $errors[] = "El precio debe ser positivo.";
+    if (!is_numeric($stock) || $stock < 0) $errors[] = "El stock debe ser entero positivo.";
 
-    // Si NO hay errores, guardamos en la base de datos
     if (empty($errors)) {
         try {
-            $stmt = $pdo->prepare("INSERT INTO products (name, description, price, stock) VALUES (:name, :desc, :price, :stock)");
-            $stmt->execute([
-                ':name' => $name,
-                ':desc' => $description,
-                ':price' => $price,
-                ':stock' => $stock
-            ]);
+            if ($id) {
+                // --- MODO EDICIÓN (UPDATE) ---
+                $sql = "UPDATE products SET name=:name, description=:desc, price=:price, stock=:stock WHERE id=:id";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ':name' => $name,
+                    ':desc' => $description,
+                    ':price' => $price,
+                    ':stock' => $stock,
+                    ':id'   => $id
+                ]);
+            } else {
+                // --- MODO CREACIÓN (INSERT) ---
+                $sql = "INSERT INTO products (name, description, price, stock) VALUES (:name, :desc, :price, :stock)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ':name' => $name,
+                    ':desc' => $description,
+                    ':price' => $price,
+                    ':stock' => $stock
+                ]);
+            }
 
-            // Redirigimos al listado para evitar reenvíos al refrescar
+            // Volvemos al listado
             header('Location: items_list.php');
             exit;
 
         } catch (PDOException $e) {
-            $errors[] = "Error al guardar en BD: " . $e->getMessage();
+            $errors[] = "Error BD: " . $e->getMessage();
         }
+    } else {
+        // Si hubo errores en el POST, mantenemos $is_edit a true si había ID
+        if ($id) $is_edit = true;
     }
 }
 ?>
@@ -58,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Nuevo Producto - Decartón</title>
+    <title><?php echo $is_edit ? 'Editar' : 'Nuevo'; ?> Producto</title>
     <style>
         body { font-family: sans-serif; margin: 20px; background-color: #f9f9f9; }
         .form-container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -74,9 +109,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 
     <div class="form-container">
-        <h1>Nuevo Producto</h1>
+        <h1><?php echo $is_edit ? 'Editar Producto' : 'Nuevo Producto'; ?></h1>
 
-        <!-- Mostrar errores si los hay -->
         <?php if (!empty($errors)): ?>
             <div class="error-box">
                 <ul>
@@ -87,10 +121,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <!-- El formulario envía los datos a esta misma página (action="") -->
+        <!-- El action se deja vacío para que se envíe a la misma URL (conservando el ?id=... si existe) -->
         <form method="POST" action="">
-            <label>Nombre del Producto:</label>
-            <!-- value="..." sirve para repintar lo que el usuario escribió si hubo error (Sticky Form) -->
+            <!-- TRUCO: Campo oculto con el ID. Así sabemos qué producto actualizar -->
+            <?php if ($is_edit): ?>
+                <input type="hidden" name="id" value="<?php echo $id; ?>">
+            <?php endif; ?>
+
+            <label>Nombre:</label>
             <input type="text" name="name" value="<?php echo htmlspecialchars($name); ?>" required>
 
             <label>Descripción:</label>
@@ -99,10 +137,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label>Precio (€):</label>
             <input type="number" name="price" step="0.01" value="<?php echo htmlspecialchars($price); ?>" required>
 
-            <label>Stock (Unidades):</label>
+            <label>Stock:</label>
             <input type="number" name="stock" value="<?php echo htmlspecialchars($stock); ?>" required>
 
-            <button type="submit">Guardar Producto</button>
+            <button type="submit">
+                <?php echo $is_edit ? 'Actualizar Cambios' : 'Guardar Producto'; ?>
+            </button>
             <a href="items_list.php" class="btn-cancel">Cancelar</a>
         </form>
     </div>
