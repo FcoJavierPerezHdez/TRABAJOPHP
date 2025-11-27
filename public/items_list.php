@@ -78,7 +78,7 @@ try {
                     <!-- CAMBIO: Ahora pasamos el ID por la URL -->
                     <a href="items_form.php?id=<?php echo $product['id']; ?>" class="btn-edit">Editar</a>
         
-                    <a href="#" class="btn-delete">Borrar</a>
+                    <a href="items_delete.php?id=<?php echo $product['id']; ?>" class="btn-delete">Borrar</a>
                     </td>
                     </td>
                 </tr>
