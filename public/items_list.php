@@ -6,7 +6,7 @@ require_once __DIR__ . '/../app/auth.php';
 require_login();
 
 // --- CONFIGURACIÓN DE PAGINACIÓN ---
-$registros_por_pagina = 10; // Cambiamos esto si queremos ver más o menos productos
+$registros_por_pagina = 5; // Cambiamos esto si queremos ver más o menos productos
 $pagina_actual = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($pagina_actual < 1) $pagina_actual = 1;
 
