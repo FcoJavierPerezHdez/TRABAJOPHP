@@ -3,16 +3,16 @@
 require_once __DIR__ . '/../app/pdo.php';
 require_once __DIR__ . '/../app/auth.php';
 
-// Leemos la preferencia del usuario que guardó preferencias.php. Si no existe, usamos 'light'.
+// Leemos la preferencia que guardó preferencias.php. Si no existe, usamos 'light'.
 $tema = $_COOKIE['tema_decarton'] ?? 'light';
 
-// Definimos variables de color PHP según el tema elegido de los disponibles
+// Definimos variables de color PHP según el tema elegido
 if ($tema === 'dark') {
     // Colores para Tema Oscuro
-    $bg_body = '#333333';       // Fondo de la página (Gris oscuro)
-    $bg_main = '#444444';       // Fondo del cuadro principal (Gris más claro)
-    $text_color = '#ffffff';    // Texto blanco
-    $shadow = 'rgba(255,255,255,0.1)'; // Sombra clarita
+    $bg_body = '#333333';       
+    $bg_main = '#444444';       
+    $text_color = '#ffffff';    
+    $shadow = 'rgba(255,255,255,0.1)'; 
 } else {
     // Colores para Tema Claro (Original)
     $bg_body = '#f4f4f4';
@@ -21,7 +21,7 @@ if ($tema === 'dark') {
     $shadow = 'rgba(0,0,0,0.1)';
 }
 
-// Consulta de prueba de conexión (igual que antes)
+// Consulta de prueba de conexión
 try {
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM products");
     $count = $stmt->fetchColumn();
@@ -38,7 +38,6 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Decartón - Tu tienda de deportes</title>
     <style>
-        /* Aquí "imprimimos" las variables de PHP dentro del CSS */
         body { 
             font-family: sans-serif; margin: 0; padding: 20px; 
             background-color: <?php echo $bg_body; ?>; 
@@ -55,7 +54,6 @@ try {
             box-shadow: 0 0 10px <?php echo $shadow; ?>; 
         }
         
-        /* Ajustamos el color del status para que se lea bien en oscuro */
         .status { padding: 10px; background: #e0f7fa; border-left: 5px solid #00bcd4; margin-bottom: 20px; color: #333; }
         
         .nav { margin-top: 20px; padding-top: 10px; border-top: 1px solid #ccc; }
@@ -95,15 +93,19 @@ try {
         <nav class="nav">
             <?php if (is_logged_in()): ?>
                 <a href="#">Mis Pedidos</a>
+                
                 <?php if ($_SESSION['role'] === 'admin'): ?>
+                    <!-- Enlace para ADMINISTRAR (Tabla con Editar/Borrar) -->
                     <a href="items_list.php">Gestionar Productos</a>
                 <?php endif; ?>
-                <a href="items_list.php">Ver Catálogo Completo</a>
+                
+                <!-- Enlace al ESCAPARATE (Tarjetas bonitas) -->
+                <a href="catalog.php">Ver Catálogo Completo</a>
+                
             <?php else: ?>
                 <a href="login.php">Iniciar Sesión</a>
             <?php endif; ?>
             
-            <!-- --- ENLACE A PREFERENCIAS (NUEVO) --- -->
             <a href="preferencias.php">Cambiar Tema</a>
         </nav>
     </main>
