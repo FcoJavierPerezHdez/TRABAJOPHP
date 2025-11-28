@@ -92,7 +92,7 @@ try {
 
         <nav class="nav">
             <?php if (is_logged_in()): ?>
-                <a href="#">Mis Pedidos</a>
+                <a href="my_orders.php">Mis Pedidos</a>
                 
                 <?php if ($_SESSION['role'] === 'admin'): ?>
                     <!-- Enlace para ADMINISTRAR (Tabla con Editar/Borrar) -->
