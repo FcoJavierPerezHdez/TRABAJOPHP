@@ -2,35 +2,33 @@
 // public/items_form.php
 require_once __DIR__ . '/../app/pdo.php';
 require_once __DIR__ . '/../app/auth.php';
+require_once __DIR__ . '/../app/csrf.php'; // Cargamos el sistema de seguridad
 
 require_login();
 
-// Variables iniciales (por defecto están vacías para "Crear nuevo producto")
+// Variables iniciales
 $id = '';
 $name = '';
 $description = '';
 $price = '';
 $stock = '';
 $errors = [];
-$is_edit = false; // Bandera para saber si estamos editando
+$is_edit = false;
 
-// --- LOGICA DE CARGA (Si venimos de darle clic a "Editar") ---
+// --- LOGICA DE CARGA (Si venimos de dar clic a "Editar") ---
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
-    // Buscamos el producto en la bbdd
     $stmt = $pdo->prepare("SELECT * FROM products WHERE id = :id LIMIT 1");
     $stmt->execute([':id' => $id]);
     $product = $stmt->fetch();
 
     if ($product) {
-        // Si existe, rellenamos las variables con sus datos
         $is_edit = true;
         $name = $product['name'];
         $description = $product['description'];
         $price = $product['price'];
         $stock = $product['stock'];
     } else {
-        // Si ponen un ID inventado, redirigimos
         header('Location: items_list.php');
         exit;
     }
@@ -38,8 +36,12 @@ if (isset($_GET['id'])) {
 
 // --- LOGICA DE GUARDADO (POST) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    
+    // Verificamos que el formulario sea legítimo antes de procesar nada
+    check_csrf(); 
+
     // Recogemos datos
-    $id = $_POST['id'] ?? ''; // Recogemos el ID oculto si existe
+    $id = $_POST['id'] ?? '';
     $name = trim($_POST['name'] ?? '');
     $description = trim($_POST['description'] ?? '');
     $price = $_POST['price'] ?? '';
@@ -53,37 +55,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         try {
             if ($id) {
-                // --- MODO EDICIÓN (UPDATE) ---
+                // UPDATE
                 $sql = "UPDATE products SET name=:name, description=:desc, price=:price, stock=:stock WHERE id=:id";
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute([
-                    ':name' => $name,
-                    ':desc' => $description,
-                    ':price' => $price,
-                    ':stock' => $stock,
-                    ':id'   => $id
-                ]);
+                $stmt->execute([':name' => $name, ':desc' => $description, ':price' => $price, ':stock' => $stock, ':id' => $id]);
             } else {
-                // --- MODO CREACIÓN (INSERT) ---
+                // INSERT
                 $sql = "INSERT INTO products (name, description, price, stock) VALUES (:name, :desc, :price, :stock)";
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute([
-                    ':name' => $name,
-                    ':desc' => $description,
-                    ':price' => $price,
-                    ':stock' => $stock
-                ]);
+                $stmt->execute([':name' => $name, ':desc' => $description, ':price' => $price, ':stock' => $stock]);
             }
-
-            // Volvemos al listado
             header('Location: items_list.php');
             exit;
-
         } catch (PDOException $e) {
             $errors[] = "Error BD: " . $e->getMessage();
         }
     } else {
-        // Si hubo errores en el POST, mantenemos $is_edit a true si había ID
         if ($id) $is_edit = true;
     }
 }
@@ -121,9 +108,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <!-- El action se deja vacío para que se envíe a la misma URL (conservando el ?id=... si existe) -->
         <form method="POST" action="">
-            <!-- TRUCO: Campo oculto con el ID. Así sabemos qué producto actualizar -->
+            <!-- Campo oculto con el Token de seguridad -->
+            <input type="hidden" name="csrf_token" value="<?php echo csrf_token(); ?>">
+
             <?php if ($is_edit): ?>
                 <input type="hidden" name="id" value="<?php echo $id; ?>">
             <?php endif; ?>
