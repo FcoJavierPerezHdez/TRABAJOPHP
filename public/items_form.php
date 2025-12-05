@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <label>Nombre:</label>
-            <input type="text" name="name" value="<?php echo htmlspecialchars($name); ?>" required>
+            <input type="text" name="name" value="<?php echo htmlspecialchars($name); ?>">
 
             <label>Descripción:</label>
             <textarea name="description" rows="4"><?php echo htmlspecialchars($description); ?></textarea>

@@ -138,8 +138,8 @@ try {
             <!-- Números de página -->
             <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
                 <a href="?page=<?php echo $i; ?><?php echo $link_extra; ?>" 
-                   class="<?php echo $i === $pagina_actual ? 'active' : ''; ?>">
-                   <?php echo $i; ?>
+                class="<?php echo $i === $pagina_actual ? 'active' : ''; ?>">
+                <?php echo $i; ?>
                 </a>
             <?php endfor; ?>
 

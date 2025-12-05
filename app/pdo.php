@@ -16,7 +16,7 @@ try {
     $options = [
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Lanza excepciones en caso de error
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       // Devuelve arrays asociativos por defecto
-        PDO::ATTR_EMULATE_PREPARES   => false,                  // Usa sentencias preparadas reales (seguridad)
+        PDO::ATTR_EMULATE_PREPARES   => false,                  // Desactiva la emulacion de las sentencias preparadas de php y fuerza al motor de la bbdd sea el que las maneje.
     ];
 
     // Crear la instancia PDO

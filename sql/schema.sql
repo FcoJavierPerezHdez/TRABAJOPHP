@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS audit_log (
 -- Insertamos un usuario de prueba (Password: '1234' hasheada con BCRYPT)
 -- Esto nos servirá para probar la conexión
 INSERT INTO users (username, email, password, role) VALUES 
-('admin', 'admin@decarton.com', '1234', 'admin');
+('admin', 'admin@decarton.com', '$2y$10$IKYYADjnK5YJo/E.8q1U7ONigmiuA5G1CJOn99mz8EvtfLIwZFJBC', 'admin');
 
 -- Insertamos un par de productos de prueba
 INSERT INTO products (name, description, price, stock) VALUES 

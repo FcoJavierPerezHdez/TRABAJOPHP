@@ -6,7 +6,7 @@ require_once __DIR__ . '/../app/auth.php';
 require_login();
 
 // --- LÓGICA DE DATOS ---
-$registros_por_pagina = 6; 
+$registros_por_pagina = 2; 
 $pagina_actual = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($pagina_actual < 1) $pagina_actual = 1;
 $busqueda = isset($_GET['q']) ? trim($_GET['q']) : '';
